@@ -114,11 +114,6 @@ WASM.prototype.c_assertFail = function(size) {
 
 
 WASM.prototype.readDylinkSection = function(buffer) {
-	// Read the WASM header and dylink section of the .wasm binary data
-	// to get the needed table size and static data size.
-
-	// https://github.com/WebAssembly/tool-conventions/blob/master/DynamicLinking.md
-	// https://github.com/kripken/emscripten/blob/20602efb955a7c6c20865a495932427e205651d2/src/support.js
 
 	var bytes = new Uint8Array(buffer);
 	var next = 0;

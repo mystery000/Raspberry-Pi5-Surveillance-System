@@ -1,8 +1,5 @@
 JSMpeg.Decoder.MPEG1Video = (function(){ "use strict";
 
-// Inspired by Java MPEG-1 Video Decoder and Player by Zoltan Korandi 
-// https://sourceforge.net/projects/javampeg1video/
-
 var MPEG1 = function(options) {
 	JSMpeg.Decoder.Base.call(this, options);
 

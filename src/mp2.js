@@ -1,8 +1,5 @@
 JSMpeg.Decoder.MP2Audio = (function(){ "use strict";
 
-// Based on kjmp2 by Martin J. Fiedler
-// http://keyj.emphy.de/kjmp2/
-
 var MP2 = function(options) {
 	JSMpeg.Decoder.Base.call(this, options);
 
