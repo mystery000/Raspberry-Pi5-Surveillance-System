@@ -1,61 +1,90 @@
-## Example Setup for Streaming: Raspberry Pi Live Webcam
+## RaspberryPi Webcam System Setup Instructions
 
-1) Install ffmpeg (See [How to install ffmpeg on Debian / Raspbian](http://superuser.com/questions/286675/how-to-install-ffmpeg-on-debian)). Using ffmpeg, we can capture the webcam video & audio and encode it into MPEG1/MP2.
-
-2) Install Node.js and npm (See [Installing Node.js on Debian and Ubuntu based Linux distributions](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions) for newer versions). The Websocket relay is written in Node.js
-
-3) Install http-server. We will use this to serve the static files (view-stream.html, jsmpeg.min.js), so that we can view the website with the video in our browser. Any other webserver would work as well (nginx, apache, etc.):
-`sudo npm -g install http-server`
-
-4) Install git and clone this repository (or just download it as ZIP and unpack)
-```
-sudo apt-get install git
-git clone https://github.com/mystery000/Raspberry-Pi5-Surveillance-System.git
+### Clone Repository
+Clone the repository inside the `/home/pi/Downloads` folder using the following command:
+```bash
+git clone https://github.com/davegroff/raspberryPi-Webcam-System.git
 ```
 
-5) Change into the jsmpeg/ directory
-`cd Raspberry-Pi5-Surveillance-System/`
+<<<<<<< HEAD
 
-6) Install the Node.js Websocket Library:
-`npm install ws`
+=======
+>>>>>>> 521a639292872e0b3ddf6c2c8cf223ac6eb4215e
+### Startup Script and Systemd Service Configuration
 
-7) Start the Websocket relay. Provide a password and a port for the incomming HTTP video stream and a Websocket port that we can connect to in the browser:
-`node websocket-relay.js supersecret 8081 8082`
+1. **Set Executable Permissions:**
+   Run the command below to set executable permissions for the startup script:
+   ```bash
+   sudo chmod +x /home/pi/Downloads/raspberryPi-Webcam-System/startup.sh
+   sudo chmod +x /home/pi/Downloads/raspberryPi-Webcam-System/program.sh
+   ```
 
-8) In a new terminal window (still in the `Raspberry-Pi5-Surveillance-System/` directory), start the `http-server` so we can serve the view-stream.html to the browser:
-`http-server`
+2. **Create/Update the Systemd Service:**
 
-9) Open the streaming website in your browser. The `http-server` will tell you the ip (usually `192.168.[...]`) and port (usually `8080`) where it's running on:
-`http://192.168.[...]:8080/view-stream.html`
+   Open and edit the systemd service file by running:
+   ```bash
+   sudo nano /etc/systemd/system/webcam.service
+   ```
 
-10) In a third terminal window, start ffmpeg to capture the webcam video and send it to the Websocket relay. Provide the password and port (from step 7) in the destination URL:
-```
-ffmpeg \
-	-f v4l2 \
-		-framerate 25 -video_size 640x480 -i /dev/video0 \
-	-f mpegts \
-		-codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 \
-	http://localhost:8081/supersecret
-```
+   Paste the following content into the file:
+   ```ini
+   [Unit]
+   Description=RaspberryPi5 Webcam System
+   After=network-online.target
 
-You should now see a live webcam image in your browser. 
+   [Service]
+   WorkingDirectory=/home/pi/Downloads/raspberryPi-Webcam-System
+   ExecStart=/home/pi/Downloads/raspberryPi-Webcam-System/startup.sh
+   User=pi
+   Restart=always
+   StandardOutput=syslog
+   StandardError=syslog
+   SyslogIdentifier=webcam_service
 
-If ffmpeg failed to open the input video, it's likely that your webcam does not support the given resolution, format or framerate. To get a list of compatible modes run:
+   [Install]
+   WantedBy=multi-user.target
+   ```
 
-`ffmpeg -f v4l2 -list_formats all -i /dev/video0`
+   ```bash
+   sudo nano /etc/systemd/system/chromium.service
+   ```
 
+   Paste the following content into the file:
+   ```ini
+   [Unit]
+   Description=Launch Chromium with Pyppeteer
+   After=network-online.target
+   Requires=network-online.target
+   
+   [Service]
+   WorkingDirectory=/home/pi/Downloads/raspberryPi-Webcam-System
+   ExecStart=/home/pi/Downloads/raspberryPi-Webcam-System/program.sh
+   User=pi
+   Restart=always
+   StandardOutput=syslog
+   StandardError=syslog
+   SyslogIdentifier=chromium_service
 
-To add the webcam audio, just call ffmpeg with two separate inputs.
+   [Install]
+   WantedBy=multi-user.target
+   ```
 
-```
-ffmpeg \
-	-f v4l2 \
-		-framerate 25 -video_size 640x480 -i /dev/video0 \
-	-f alsa \
-		-ar 44100 -c 2 -i hw:0 \
-	-f mpegts \
-		-codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 \
-		-codec:a mp2 -b:a 128k \
-		-muxdelay 0.001 \
-	http://localhost:8081/supersecret
-```
+3. **Reload Systemd Daemon and Manage the Service:**
+   Run the following commands to reload the systemd daemon, enable, start, and check the status of the service:
+   ```bash
+   sudo systemctl daemon-reload
+
+   sudo systemctl enable webcam.service
+   sudo systemctl start webcam.service
+   sudo systemctl status webcam.service
+
+   sudo systemctl enable chromium.service
+   sudo systemctl start chromium.service
+   sudo systemctl status chromium.service
+   ```
+
+### Access the System
+Open a web browser and go to `localhost:9000` to serve the video stream from Raspberry Pi
+To see the stream, launch browser and go to `localhost:9000/stream`
+
+Follow these steps meticulously to ensure a seamless setup and management of the RaspberryPi Webcam System as a Systemd service on your Raspberry Pi device.  
